@@ -59,134 +59,59 @@ class MatplotlibActualFT(QObject):
             self._container.addWidget(self._canvas)
 
             self._axes = self._figure.subplots(3, 1, sharex=True)
+            self._ax_force = self._axes[0]
+            self._ax_torque = self._axes[1]
+            self._ax_scalar = self._axes[2]
             #
 
-            self._x_axis_range = 100
+            self._x_axis_range = 500
+            #
             self._force_max = 1
             self._force_min = 0
-            # self._force_axes = []
-            # self._torque_axes = []
             #
+            self._torque_max = 1
+            self._torque_min = 0
+            #
+            self._scalar_max = 1
+            self._scalar_min = 0
 
-            self.update_ylabels()
+            self._update_labels()
 
             # Tighten the layout
             self._figure.tight_layout()
 
             # Create an empty line object
             self.new_x = 0
-            self.x = []
+            self._x_data_list = []
             self.y = []
 
-            (self.line,) = self._axes[0].plot([], [])
-            # (self._line_Fx,) = self._axes[0].plot(self.UR.timstamp_list, self.UR.actual_tcp_Fx)
-            # Set up the plot axes
-            self._axes[0].set_xlim(0, 100)
-            # self._axes[0].set_ylim(-100, 100)
+            (self._line_actual_fx,) = self._ax_force.plot([], [], label="Fx")
+            (self._line_actual_fy,) = self._ax_force.plot([], [], label="Fy")
+            (self._line_actual_fz,) = self._ax_force.plot([], [], label="Fz")
 
-            # Update the plot
-            # self._canvas.draw()
+            (self._line_actual_tx,) = self._ax_torque.plot([], [], label="Tx")
+            (self._line_actual_ty,) = self._ax_torque.plot([], [], label="Ty")
+            (self._line_actual_tz,) = self._ax_torque.plot([], [], label="Tz")
 
-            # self.ani = animation.FuncAnimation(self._figure, self.animation_callback, interval=250)
-            self.ani = animation.FuncAnimation(self._figure, self.update, interval=10)
+            (self._line_actual_scalar,) = self._ax_scalar.plot([], [], label="Scalar")
+
+            self._ax_force.legend()
+            self._ax_torque.legend()
+            self._ax_scalar.legend()
+            #
+            self._animation_ft = animation.FuncAnimation(self._figure, self._update_charts, interval=10)
 
         except Exception as err:
             #
             console.print_exception()
 
-        # self.mpl_canvas.draw_idle()
-
-        # Enable mouse scrolling for zooming
-        # self.mpl_canvas.mpl_connect("scroll_event", self.on_scroll)
-
-    # Function to generate new data
-    def generate_data(self):
-        self.y = np.array(self.UR.actual_tcp_Fx)
-        self.x = np.arange(0, len(self.UR.get_timeframe()), 1)
-        # self.y = np.arange(0, len(self.UR.get_timeframe()), 1)
-
-    # Function to update the plot
-    def update(self, frame):
-        self.generate_data()
-        # console.log("self.x:", self.x)
-        # console.log("self.y:", self.y)
-        # console.log("self.UR.timstamp_list:", self.UR.timstamp_list)
-        # console.log("self.UR.actual_tcp_Fxt:", self.UR.actual_tcp_Fx)
-
-        # self.line.set_data(self.UR.timstamp_list, self.UR.actual_tcp_Fx)
-        self.line.set_data(self.x, self.y)
-
-        if len(self.x) > 100:
-            self._axes[0].set_xlim(len(self.x) - self._x_axis_range, len(self.x))
-        else:
-            self._axes[0].set_xlim(0, self._x_axis_range)
-
-        # y-axis, Calculate the minimum and maximum y-values within the time frame
-        def get_max(x_list):
-            if len(x_list) >= self._x_axis_range:
-                lastest_elements = x_list[-1 * self._x_axis_range :]
-                return max(lastest_elements)
-            elif len(x_list) > 0:
-                return max(x_list)
-            else:
-                return 1
-
-        def get_min(x_list):
-            if len(x_list) >= self._x_axis_range:
-                lastest_elements = x_list[-1 * self._x_axis_range :]
-                return min(lastest_elements)
-            elif len(x_list) > 0:
-                return min(x_list)
-            else:
-                return 0
-
-        y_max = get_max(self.UR.actual_tcp_Fx)
-        y_min = get_min(self.UR.actual_tcp_Fx)
-
-        _should_update_y_lims = False
-
-        if y_max > self._force_max:
-            console.log("changing y-max")
-            self._force_max = y_max
-            _should_update_y_lims = True
-
-        if y_min < self._force_min:
-            console.log("changing y-min")
-
-            self._force_min = y_min
-            _should_update_y_lims = True
-
-        if _should_update_y_lims:
-            console.log(y_min, y_max)
-            self._axes[0].set_ylim(self._force_min, self._force_max)
-
-    def animation_callback(self, i):
-        # self._feedback_position_list
-        console.log("animation_callback - ", i, len(self.UR.timstamp_list), len(self.UR.actual_tcp_Fx))
-        #
-        self._line_Fx.set_data(self.UR.timstamp_list, self.UR.actual_tcp_Fx)
-        self._axes[0].set_xlim(max(0, len(self.UR.timstamp_list) - 10), len(self.UR.timstamp_list))
-
-        # _timestamp_list = self.UR.timstamp_list
-        # _actual_tcp_Fx = self.UR.actual_tcp_Fx
-        # #
-        # console.log("_timestamp_list:", _timestamp_list.__len__())
-        # console.log("_actual_tcp_Fx:", _actual_tcp_Fx.__len__())
-        # # console.log("_actual_tcp_force_list:", _actual_tcp_force_list)
-        # self.update_charts(
-        #     x_axis_data=_timestamp_list,
-        #     ax0_data=_actual_tcp_Fx,
-        #     # ax2_data=self._feedback_velocity_list,
-        #     # ax4_data=self._feedback_torque_list,
-        # )
-
-    def update_ylabels(self):
+    def _update_labels(self):
         try:
             #
             func_name = "update_ylabels"
             LABEL = f"{module_name}/{func_name}"
             #        s
-            self._axes[0].set_ylabel("Force (N)", labelpad=20)
+            self._ax_force.set_ylabel("Force (N)", labelpad=20)
             self._axes[1].set_ylabel("Torque (Nm)", labelpad=20)
             self._axes[2].set_ylabel("Force (scalar)", labelpad=20)
 
@@ -199,20 +124,153 @@ class MatplotlibActualFT(QObject):
             #
             console.print_exception()
 
-    def update_charts(self, x_axis_data=[], ax0_data=[], ax1_data=[], ax2_data=[]):
-        # Update axes[0]
-        # self._axes[0].clear()  # Clear the previous data
-        self._axes[0].plot(x_axis_data, ax0_data, "-", color="red")  # Plot new data
-
-        # # Update axes[1]
-        # self._axes[1].clear()  # Clear the previous data
-        # self._axes[1].plot(x_axis_data, ax1_data, "-", color="green")  # Plot new data
-
-        # self._axes[3].clear()  # Clear the previous data
-        # self._axes[2].plot(x_axis_data, ax2_data, "-", color="blue")  # Plot new data
-
-        # self.update_ylabels()
-
+    def get_min_max_in_range(self, y_list):
         #
-        self._canvas.draw()  # Redraw the canvas to reflect the changes
-        # self.mpl_canvas.draw_idle()
+        y_min = 0
+        y_max = 0
+        #
+        if len(y_list) >= self._x_axis_range:
+            #
+            lastest_elements = y_list[-1 * self._x_axis_range :]
+            #
+            y_max = max(lastest_elements)
+            y_min = min(lastest_elements)
+            #
+        elif len(y_list) > 0:
+            #
+            y_max = max(y_list)
+            y_min = min(y_list)
+            #
+        else:
+            #
+            y_max = 1
+            y_min = 0
+        #
+        return (y_min, y_max)
+
+    def _update_charts(self, frame):
+        self._update_force(frame)
+        self._update_torque(frame)
+        self._update_scalar(frame)
+
+    # Function to update the plot
+    def _update_force(self, frame):
+        #
+        _x_data_list = self.UR.pkg_count_list
+        _fx_list = self.UR.actual_tcp_Fx
+        _fy_list = self.UR.actual_tcp_Fy
+        _fz_list = self.UR.actual_tcp_Fz
+
+        # plot the data
+        self._line_actual_fx.set_data(_x_data_list, _fx_list)
+        self._line_actual_fy.set_data(_x_data_list, _fy_list)
+        self._line_actual_fz.set_data(_x_data_list, _fz_list)
+
+        # Adjust x-axist #
+        if len(_x_data_list) > self._x_axis_range:
+            self._ax_force.set_xlim(len(_x_data_list) - self._x_axis_range, len(_x_data_list))
+        else:
+            self._ax_force.set_xlim(0, self._x_axis_range)
+
+        # y-axis, Calculate the minimum and maximum y-values within the time frame
+        _y_data_lists = [_fx_list, _fy_list, _fz_list]
+
+        for f_data in _y_data_lists:
+            #
+            y_min, y_max = self.get_min_max_in_range(f_data)
+            #
+            _should_update_y_lims = False
+
+            if y_max > self._force_max:
+                console.log("changing y-max")
+                self._force_max = y_max
+                _should_update_y_lims = True
+
+            if y_min < self._force_min:
+                console.log("changing y-min")
+
+                self._force_min = y_min
+                _should_update_y_lims = True
+
+            if _should_update_y_lims:
+                console.log(y_min, y_max)
+                self._ax_force.set_ylim(self._force_min, self._force_max)
+
+    # Function to update the plot
+    def _update_torque(self, frame):
+        #
+        x_data_list = self.UR.pkg_count_list
+        tx_list = self.UR.actual_tcp_Tx
+        ty_list = self.UR.actual_tcp_Ty
+        tz_list = self.UR.actual_tcp_Tz
+
+        # plot the data
+        self._line_actual_tx.set_data(x_data_list, tx_list)
+        self._line_actual_ty.set_data(x_data_list, ty_list)
+        self._line_actual_tz.set_data(x_data_list, tz_list)
+
+        # Adjust x-axist #
+        if len(x_data_list) > self._x_axis_range:
+            self._ax_torque.set_xlim(len(x_data_list) - self._x_axis_range, len(x_data_list))
+        else:
+            self._ax_torque.set_xlim(0, self._x_axis_range)
+
+        # y-axis, Calculate the minimum and maximum y-values within the time frame
+        _y_data_lists = [tx_list, ty_list, tz_list]
+
+        for f_data in _y_data_lists:
+            #
+            y_min, y_max = self.get_min_max_in_range(f_data)
+            #
+            _should_update_y_lims = False
+
+            if y_max > self._torque_max:
+                console.log("changing y-max")
+                self._torque_max = y_max
+                _should_update_y_lims = True
+
+            if y_min < self._torque_min:
+                console.log("changing y-min")
+
+                self._torque_min = y_min
+                _should_update_y_lims = True
+
+            if _should_update_y_lims:
+                console.log(y_min, y_max)
+                self._ax_torque.set_ylim(self._torque_min, self._torque_max)
+
+    def _update_scalar(self, frame):
+        #
+        x_data_list = self.UR.pkg_count_list
+        force_list = self.UR.actual_tcp_scalar
+        # console.log("force_list:", force_list.__len__())
+
+        # plot the data
+        self._line_actual_scalar.set_data(x_data_list, force_list)
+
+        # Adjust x-axist #
+        if len(x_data_list) > self._x_axis_range:
+            self._ax_scalar.set_xlim(len(x_data_list) - self._x_axis_range, len(x_data_list))
+        else:
+            self._ax_scalar.set_xlim(0, self._x_axis_range)
+
+        # y-axis, Calculate the minimum and maximum y-values within the time frame
+
+        y_min, y_max = self.get_min_max_in_range(force_list)
+        #
+        _should_update_y_lims = False
+
+        if y_max > self._scalar_max:
+            console.log("changing y-max")
+            self._scalar_max = y_max
+            _should_update_y_lims = True
+
+        if y_min < self._scalar_min:
+            console.log("changing y-min")
+
+            self._scalar_min = y_min
+            _should_update_y_lims = True
+
+        if _should_update_y_lims:
+            console.log(y_min, y_max)
+            self._ax_scalar.set_ylim(self._scalar_min, self._scalar_max)

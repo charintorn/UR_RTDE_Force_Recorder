@@ -7,6 +7,7 @@
 		<field name="actual_TCP_force" type="VECTOR6D"/>
 		<field name="actual_TCP_pose" type="VECTOR6D"/>
 		<field name="actual_TCP_speed" type="VECTOR6D"/>
+		<field name="tcp_force_scalar" type="DOUBLE"/>
 		<field name="output_bit_registers0_to_31" type="UINT32"/>
 		<field name="output_int_register_0" type="INT32"/>
 		<field name="output_double_register_0" type="DOUBLE"/>

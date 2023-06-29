@@ -47,6 +47,8 @@ class UrRTDE(QObject):
 
             # -- Attributes -- #
             # data #
+            self.pkg_count = 0
+            self.pkg_count_list = []
             self.timstamp_list = []
             self.actual_tcp_force_list = []  # list of vector6D
             self.actual_tcp_Fx = []
@@ -55,6 +57,7 @@ class UrRTDE(QObject):
             self.actual_tcp_Tx = []
             self.actual_tcp_Ty = []
             self.actual_tcp_Tz = []
+            self.actual_tcp_scalar = []
 
             # RTDE #
             self._CONFIG_FILE = "rtde_config.xml"
@@ -241,15 +244,16 @@ class UrRTDE(QObject):
             while self._read_thread_running:
                 # console.log("read")
                 state = self._rtde_connection.receive()
-                timestamp = state.timestamp
-                actual_TCP_force = state.actual_TCP_force
+                # timestamp = state.timestamp
+                # actual_TCP_force = state.actual_TCP_force
                 # print("timestamp:", timestamp, "\tactual_TCP_force:", actual_TCP_force)
                 # console.log("actual_TCP_force:", actual_TCP_force)
 
                 self.rtdeFetchedSignal.emit(
                     {
-                        "timestamp": timestamp,
-                        "actual_TCP_force": actual_TCP_force,
+                        "timestamp": state.timestamp,
+                        "actual_TCP_force": state.actual_TCP_force,
+                        "tcp_force_scalar": state.tcp_force_scalar,
                     }
                 )
 
@@ -267,17 +271,24 @@ class UrRTDE(QObject):
         #
         timstamp = data["timestamp"]
         Fx = data["actual_TCP_force"][0]
-        # console.log("Fx:", Fx)
+        Fy = data["actual_TCP_force"][1]
+        Fz = data["actual_TCP_force"][2]
+        Tx = data["actual_TCP_force"][3]
+        Ty = data["actual_TCP_force"][4]
+        Tz = data["actual_TCP_force"][5]
+        Force = data["tcp_force_scalar"]
+        # console.log("Force:", Force)
         self.timstamp_list.append(timstamp)
+        #
+        self.pkg_count_list.append(self.pkg_count)
+        #
         self.actual_tcp_Fx.append(Fx)
-        self.actual_tcp_Fy.append(data["actual_TCP_force"][1])
-        self.actual_tcp_Fz.append(data["actual_TCP_force"][2])
-        self.actual_tcp_Tx.append(data["actual_TCP_force"][3])
-        self.actual_tcp_Ty.append(data["actual_TCP_force"][4])
-        self.actual_tcp_Tz.append(data["actual_TCP_force"][5])
+        self.actual_tcp_Fy.append(Fy)
+        self.actual_tcp_Fz.append(Fz)
+        self.actual_tcp_Tx.append(Tx)
+        self.actual_tcp_Ty.append(Ty)
+        self.actual_tcp_Tz.append(Tz)
+        #
+        self.actual_tcp_scalar.append(Force)
 
-    def get_timeframe(self):
-        return self.timstamp_list
-
-    def get_fx(self):
-        return self.actual_tcp_Fx
+        self.pkg_count = self.pkg_count + 1
