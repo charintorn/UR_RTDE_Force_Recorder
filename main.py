@@ -60,6 +60,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self._update_ui()
 
+    # def resizeEvent(self, event):
+    #     super().resizeEvent(event)
+    #     self._actual_ft_matplot._figure.tight_layout()
+    #     self._actual_ft_matplot._canvas.draw()
+
     def onConnectedChanged(self, status):
         #
         console.log("onConnectedChanged:", status)

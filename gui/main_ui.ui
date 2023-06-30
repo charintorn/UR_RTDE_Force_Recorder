@@ -143,8 +143,14 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_autoscroll">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Autoscroll</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

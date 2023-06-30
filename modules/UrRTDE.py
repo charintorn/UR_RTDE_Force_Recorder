@@ -95,13 +95,18 @@ class UrRTDE(QObject):
             # -- Emitters -- #
 
             # -- Signals -- #
+
             # connection
             self.MAIN_WIN.lineEdit_ip.textChanged.connect(self.changeIp)
             self.MAIN_WIN.pushButton_start.clicked.connect(self.onStartBtnClicked)
+
             # frequency
             self.MAIN_WIN.comboBox_frequency.currentTextChanged.connect(self.freqComboboxTextChanged)
+
             # RTDE
             self.rtdeFetchedSignal.connect(self.rtde_fetched)
+            self.MAIN_WIN.pushButton_clear.clicked.connect(self.clear_data_record)
+
             # -- Initialize -- #
             self.init_rtde()
 
@@ -312,3 +317,16 @@ class UrRTDE(QObject):
         }
         #
         return data
+
+    def clear_data_record(self):
+        self.pkg_count = 0
+        self.pkg_count_list = []
+        self.timstamp_list = []
+        self.actual_tcp_force_list = []  # list of vector6D
+        self.actual_tcp_Fx = []
+        self.actual_tcp_Fy = []
+        self.actual_tcp_Fz = []
+        self.actual_tcp_Tx = []
+        self.actual_tcp_Ty = []
+        self.actual_tcp_Tz = []
+        self.actual_tcp_scalar = []

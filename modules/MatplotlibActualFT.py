@@ -39,6 +39,7 @@ class MatplotlibActualFT(QObject):
             self.UR = self.MAIN_WIN._ur
             #
             self._container = self.MAIN_WIN.verticalLayout_actualFT
+
             # Attributes ##########################################################################
 
             # Local refs ##########################################################################
@@ -53,7 +54,9 @@ class MatplotlibActualFT(QObject):
             #
             self._figure = matplotlib.figure.Figure()
             self._canvas = FigureCanvas(self._figure)
+            self._canvas.mpl_connect("resize_event", self.on_resize)
             # self._canvas.callbacks.connect("event", self.on_figure_event)
+
             self._canvas.mpl_connect("scroll_event", self.on_scroll)
             self._toolbar = NavigationToolbar(self._canvas, self.MAIN_WIN)
             #
@@ -69,6 +72,7 @@ class MatplotlibActualFT(QObject):
                 _ax.callbacks.connect("ylim_changed", self._on_ylim_changed)
             #
 
+            # limits and scrolling ----------------------------------------------------------------
             self._x_axis_range = 500
             #
             self._force_max = 1
@@ -80,10 +84,11 @@ class MatplotlibActualFT(QObject):
             self._scalar_max = 1
             self._scalar_min = 0
 
-            self._update_labels()
+            self._autoscroll_x = None
+            self.MAIN_WIN.checkBox_autoscroll.stateChanged.connect(self._autoscroll_changed)
+            self._autoscroll_changed(self.MAIN_WIN.checkBox_autoscroll.isChecked())
 
-            # Tighten the layout
-            self._figure.tight_layout()
+            self._update_labels()
 
             # Create an empty line object
             self._x_data_list = []
@@ -98,13 +103,13 @@ class MatplotlibActualFT(QObject):
 
             (self._line_actual_scalar,) = self._ax_scalar.plot([], [], label="Scalar")
 
+            # Legend ------------------------------------------------------------------------------
             self._ax_force.legend()
             self._ax_torque.legend()
             self._ax_scalar.legend()
-            #
-            self._enable_plotting = False
 
             # Plotting ----------------------------------------------------------------------------
+            self._enable_plotting = False
             self._thread_plot = None
 
             # UR ----------------------------------------------------------------------------------
@@ -114,12 +119,15 @@ class MatplotlibActualFT(QObject):
             #
             console.print_exception()
 
+    # #############################################################################################
+    # Plotting ####################################################################################
+    # #############################################################################################
     def _update_labels(self):
         try:
             #
             func_name = "update_ylabels"
             LABEL = f"{module_name}/{func_name}"
-            #        s
+            #
             self._ax_force.set_ylabel("Force (N)", labelpad=20)
             self._axes[1].set_ylabel("Torque (Nm)", labelpad=20)
             self._axes[2].set_ylabel("Force (scalar)", labelpad=20)
@@ -157,6 +165,7 @@ class MatplotlibActualFT(QObject):
         #
         return (y_min, y_max)
 
+    # 3 main axes #################################################################################
     # Function to update the plot
     def _update_force(self):
         #
@@ -171,10 +180,11 @@ class MatplotlibActualFT(QObject):
         self._line_actual_fz.set_data(_x_data_list, _fz_list)
 
         # Adjust x-axist #
-        if len(_x_data_list) > self._x_axis_range:
-            self._ax_force.set_xlim(len(_x_data_list) - self._x_axis_range, len(_x_data_list))
-        else:
-            self._ax_force.set_xlim(0, self._x_axis_range)
+        if self._autoscroll_x:
+            if len(_x_data_list) > self._x_axis_range:
+                self._ax_force.set_xlim(len(_x_data_list) - self._x_axis_range, len(_x_data_list))
+            else:
+                self._ax_force.set_xlim(0, self._x_axis_range)
 
         # y-axis, Calculate the minimum and maximum y-values within the time frame
         _y_data_lists = [_fx_list, _fy_list, _fz_list]
@@ -214,10 +224,11 @@ class MatplotlibActualFT(QObject):
         self._line_actual_tz.set_data(x_data_list, tz_list)
 
         # Adjust x-axist #
-        if len(x_data_list) > self._x_axis_range:
-            self._ax_torque.set_xlim(len(x_data_list) - self._x_axis_range, len(x_data_list))
-        else:
-            self._ax_torque.set_xlim(0, self._x_axis_range)
+        if self._autoscroll_x:
+            if len(x_data_list) > self._x_axis_range:
+                self._ax_torque.set_xlim(len(x_data_list) - self._x_axis_range, len(x_data_list))
+            else:
+                self._ax_torque.set_xlim(0, self._x_axis_range)
 
         # y-axis, Calculate the minimum and maximum y-values within the time frame
         _y_data_lists = [tx_list, ty_list, tz_list]
@@ -229,18 +240,18 @@ class MatplotlibActualFT(QObject):
             _should_update_y_lims = False
 
             if y_max > self._torque_max:
-                console.log("changing y-max")
+                # console.log("changing y-max")
                 self._torque_max = y_max
                 _should_update_y_lims = True
 
             if y_min < self._torque_min:
-                console.log("changing y-min")
+                # console.log("changing y-min")
 
                 self._torque_min = y_min
                 _should_update_y_lims = True
 
             if _should_update_y_lims:
-                console.log(y_min, y_max)
+                # console.log(y_min, y_max)
                 self._ax_torque.set_ylim(self._torque_min, self._torque_max)
 
     def _update_scalar(self):
@@ -253,10 +264,11 @@ class MatplotlibActualFT(QObject):
         self._line_actual_scalar.set_data(x_data_list, force_list)
 
         # Adjust x-axist #
-        if len(x_data_list) > self._x_axis_range:
-            self._ax_scalar.set_xlim(len(x_data_list) - self._x_axis_range, len(x_data_list))
-        else:
-            self._ax_scalar.set_xlim(0, self._x_axis_range)
+        if self._autoscroll_x:
+            if len(x_data_list) > self._x_axis_range:
+                self._ax_scalar.set_xlim(len(x_data_list) - self._x_axis_range, len(x_data_list))
+            else:
+                self._ax_scalar.set_xlim(0, self._x_axis_range)
 
         # y-axis, Calculate the minimum and maximum y-values within the time frame
 
@@ -265,18 +277,18 @@ class MatplotlibActualFT(QObject):
         _should_update_y_lims = False
 
         if y_max > self._scalar_max:
-            console.log("changing y-max")
+            # console.log("changing y-max")
             self._scalar_max = y_max
             _should_update_y_lims = True
 
         if y_min < self._scalar_min:
-            console.log("changing y-min")
+            # console.log("changing y-min")
 
             self._scalar_min = y_min
             _should_update_y_lims = True
 
         if _should_update_y_lims:
-            console.log(y_min, y_max)
+            # console.log(y_min, y_max)
             self._ax_scalar.set_ylim(self._scalar_min, self._scalar_max)
 
     # Thread ######################################################################################
@@ -327,7 +339,7 @@ class MatplotlibActualFT(QObject):
             self._scalar_min = ymin if ymin > self._scalar_min else self._scalar_min
             self._scalar_max = ymax if ymax < self._scalar_max else self._scalar_max
 
-        print("Y-axis limits changed", _ax_idx)
+        # print("Y-axis limits changed", _ax_idx)
 
     def on_scroll(self, event):
         if event.button == "up":
@@ -337,7 +349,16 @@ class MatplotlibActualFT(QObject):
             # print("Scrolled down")
             self._x_axis_range = self._x_axis_range + 100
 
+    def _autoscroll_changed(self, state):
+        self._autoscroll_x = state
+
+    def on_resize(self, event):
+        self._figure.tight_layout()
+        # self._canvas.draw()
+
+    # #############################################################################################
     # UR RTDE #####################################################################################
+    # #############################################################################################
     def onConnectedChanged(self, connected):
         #
         try:

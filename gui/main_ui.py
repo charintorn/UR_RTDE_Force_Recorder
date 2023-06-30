@@ -70,6 +70,8 @@ class Ui_MainWindow(object):
         self.line.setObjectName("line")
         self.horizontalLayout_ipRow2.addWidget(self.line)
         self.checkBox_autoscroll = QtWidgets.QCheckBox(self.centralwidget)
+        self.checkBox_autoscroll.setEnabled(True)
+        self.checkBox_autoscroll.setChecked(True)
         self.checkBox_autoscroll.setObjectName("checkBox_autoscroll")
         self.horizontalLayout_ipRow2.addWidget(self.checkBox_autoscroll)
         self.pushButton_clear = QtWidgets.QPushButton(self.centralwidget)
