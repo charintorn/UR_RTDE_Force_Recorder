@@ -34,13 +34,16 @@ class UrRTDE(QObject):
     connectedSignal = pyqtSignal(bool)
     rtdeFetchedSignal = pyqtSignal(dict)
 
-    #
+    # #############################################################################################
+    # __init__ ####################################################################################
+    # #############################################################################################
     def __init__(self, main_win) -> None:
         try:
             super().__init__()
             #
             func_name = "__init__"
             LABEL = f"{module_name}/{func_name}"
+            console.log(LABEL, style="info")
             #
 
             # -- Parent refs -- #
@@ -85,12 +88,6 @@ class UrRTDE(QObject):
             self.MAIN_WIN.comboBox_frequency.setCurrentIndex(4)
             self._freq = self.freqComboboxTextChanged(self.MAIN_WIN.comboBox_frequency.currentText())
 
-            # Save #
-            self._save_dir = ""
-            file_directory = os.path.dirname(os.path.abspath(__file__))
-            parent_directory = os.path.abspath(os.path.join(file_directory, ".."))
-            self.changeSaveDirectory(parent_directory)
-
             # -- Local refs -- #
 
             # -- Actions -- #
@@ -105,9 +102,6 @@ class UrRTDE(QObject):
             self.MAIN_WIN.comboBox_frequency.currentTextChanged.connect(self.freqComboboxTextChanged)
             # RTDE
             self.rtdeFetchedSignal.connect(self.rtde_fetched)
-            # Save
-            self.MAIN_WIN.pushButton_browse.clicked.connect(self.open_directory_dialog)
-
             # -- Initialize -- #
             self.init_rtde()
 
@@ -115,23 +109,9 @@ class UrRTDE(QObject):
             #
             console.print_exception()
 
-    # Save ########################################################################################
-    def open_directory_dialog(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.ShowDirsOnly
-        directory = QFileDialog.getExistingDirectory(
-            self.MAIN_WIN, "Select Save Directory", self._save_dir, options=options
-        )
-
-        if directory:
-            # console.log("Selected directory:", directory)
-            self.changeSaveDirectory(directory)
-
-    def changeSaveDirectory(self, dir_path_str):
-        self._save_dir = dir_path_str
-        self.MAIN_WIN.lineEdit_saveFilePath.setText(self._save_dir)
-
+    # #############################################################################################
     # Frequency ###################################################################################
+    # #############################################################################################
     def freqComboboxTextChanged(self, text):
         _freq = self.extractFreqFromText(text)
         return self.changeFreq(_freq)
@@ -156,13 +136,14 @@ class UrRTDE(QObject):
     def changeFreq(self, freq):
         #
         self._freq = freq
-
         #
-        console.log("changeFreq:", self._freq)
+        # console.log("changeFreq:", self._freq)
         #
         return self._freq
 
+    # #############################################################################################
     # Connection ##################################################################################
+    # #############################################################################################
     def changeIp(self, ip_str):
         self._ip = ip_str.replace(" ", "")
         # console.log("changeIp:", self._ip)
@@ -227,7 +208,9 @@ class UrRTDE(QObject):
             #
             console.print_exception()
 
+    # #############################################################################################
     # RTDE ########################################################################################
+    # #############################################################################################
     def init_rtde(self):
         # Get the path of the current directory
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -288,9 +271,8 @@ class UrRTDE(QObject):
         return thread
 
     def rtde_fetched(self, data):
-        #
+        # Receive a package, from read thread.
         # console.log("rtde_fetched:", data)
-        #
         #
         timstamp = data["timestamp"]
         Fx = data["actual_TCP_force"][0]
@@ -315,3 +297,18 @@ class UrRTDE(QObject):
         self.actual_tcp_scalar.append(Force)
 
         self.pkg_count = self.pkg_count + 1
+
+    def get_data_record(self):
+        # get the data that had been recorded.
+        data = {
+            "timestamp": self.timstamp_list,
+            "actual_TCP_force_0": self.actual_tcp_Fx,
+            "actual_TCP_force_1": self.actual_tcp_Fy,
+            "actual_TCP_force_2": self.actual_tcp_Fz,
+            "actual_TCP_force_3": self.actual_tcp_Tx,
+            "actual_TCP_force_4": self.actual_tcp_Ty,
+            "actual_TCP_force_5": self.actual_tcp_Tz,
+            "tcp_force_scalar": self.actual_tcp_scalar,
+        }
+        #
+        return data

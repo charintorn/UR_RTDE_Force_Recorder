@@ -53,6 +53,7 @@ class MatplotlibActualFT(QObject):
             #
             self._figure = matplotlib.figure.Figure()
             self._canvas = FigureCanvas(self._figure)
+            self._canvas.callbacks.connect("event", self.on_figure_event)
             self._toolbar = NavigationToolbar(self._canvas, self.MAIN_WIN)
             #
             self._container.addWidget(self._toolbar)
@@ -62,6 +63,9 @@ class MatplotlibActualFT(QObject):
             self._ax_force = self._axes[0]
             self._ax_torque = self._axes[1]
             self._ax_scalar = self._axes[2]
+            #
+            for _ax in self._axes:
+                _ax.callbacks.connect("ylim_changed", self._on_ylim_changed)
             #
 
             self._x_axis_range = 500
@@ -181,18 +185,18 @@ class MatplotlibActualFT(QObject):
             _should_update_y_lims = False
 
             if y_max > self._force_max:
-                console.log("changing y-max")
+                # console.log("changing y-max")
                 self._force_max = y_max
                 _should_update_y_lims = True
 
             if y_min < self._force_min:
-                console.log("changing y-min")
+                # console.log("changing y-min")
 
                 self._force_min = y_min
                 _should_update_y_lims = True
 
             if _should_update_y_lims:
-                console.log(y_min, y_max)
+                # console.log(y_min, y_max)
                 self._ax_force.set_ylim(self._force_min, self._force_max)
 
     # Function to update the plot
@@ -298,6 +302,43 @@ class MatplotlibActualFT(QObject):
         thread.start()
         #
         return thread
+
+    # #############################################################################################
+    # Figure Events ###############################################################################
+    # #############################################################################################
+    def _on_ylim_changed(self, ax):
+        #
+        _ax = ax
+        # Y-axis limits changed, perform your desired action here
+        _ax_idx = self._figure.axes.index(_ax)
+
+        # Retrieve the y-axis limits
+        ymin, ymax = _ax.get_ylim()
+
+        if _ax_idx == 0:
+            # console.log(f"({self._force_min}, {self._force_max}) - ({ymin}, {ymax})")
+            self._force_min = ymin if ymin > self._force_min else self._force_min
+            self._force_max = ymax if ymax < self._force_max else self._force_max
+        elif _ax_idx == 1:
+            self._torque_min = ymin if ymin > self._torque_min else self._torque_min
+            self._torque_max = ymax if ymax < self._torque_max else self._torque_max
+        elif _ax_idx == 2:
+            self._scalar_min = ymin if ymin > self._scalar_min else self._scalar_min
+            self._scalar_max = ymax if ymax < self._scalar_max else self._scalar_max
+
+        print("Y-axis limits changed", _ax_idx)
+
+    def on_figure_event(self, event):
+        console.log("on_figure_event")
+        # if event.name == 'draw_event':
+        #     current_figure_options = self.get_figure_options()
+        #     if current_figure_options != self._prev_figure_options:
+        #         self._prev_figure_options = current_figure_options
+        #         self.figure.canvas.callbacks.process(FigureOptionChangeEvent())
+        # elif event.name == 'figure_option_change_event':
+        #     # Handle the figure option change event
+        #     print("Figure option has been changed!")
+        #     # Perform any necessary actions here
 
     # UR RTDE #####################################################################################
     def onConnectedChanged(self, connected):

@@ -134,6 +134,27 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_autoscroll">
+          <property name="text">
+           <string>Autoscroll</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_clear">
+          <property name="text">
+           <string>Clear</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -177,7 +198,7 @@
                <x>0</x>
                <y>0</y>
                <width>1033</width>
-               <height>618</height>
+               <height>600</height>
               </rect>
              </property>
             </widget>
@@ -197,7 +218,7 @@
      <x>0</x>
      <y>0</y>
      <width>1079</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

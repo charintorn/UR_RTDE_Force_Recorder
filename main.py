@@ -31,6 +31,7 @@ from modules.rich_setup import *
 # Modules
 from modules.MatplotlibActualFT import MatplotlibActualFT
 from modules.UrRTDE import UrRTDE
+from modules.FileManager import FileManager
 
 #
 module_name = "main_win"
@@ -44,15 +45,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         LABEL = f"{module_name}/{func_name}"
         #
         self.setupUi(self)
-        #
+
+        # UR RTDE #################################################################################
         self._ur = UrRTDE(self)
         self._ur_connected = False
         self._ur.connectedSignal.connect(self.onConnectedChanged)
         # self._ur.rtdeFetchedSignal.connect(lambda data: console.log(data))
-        # #
+
+        # Matplotlib ##############################################################################
         self._actual_ft_matplot = MatplotlibActualFT(self)
-        #
-        #
+
+        # Matplotlib ##############################################################################
+        self.FILE_MANAGER = FileManager(self)
+
         self._update_ui()
 
     def onConnectedChanged(self, status):
