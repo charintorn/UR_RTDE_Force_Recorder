@@ -53,7 +53,8 @@ class MatplotlibActualFT(QObject):
             #
             self._figure = matplotlib.figure.Figure()
             self._canvas = FigureCanvas(self._figure)
-            self._canvas.callbacks.connect("event", self.on_figure_event)
+            # self._canvas.callbacks.connect("event", self.on_figure_event)
+            self._canvas.mpl_connect("scroll_event", self.on_scroll)
             self._toolbar = NavigationToolbar(self._canvas, self.MAIN_WIN)
             #
             self._container.addWidget(self._toolbar)
@@ -328,17 +329,13 @@ class MatplotlibActualFT(QObject):
 
         print("Y-axis limits changed", _ax_idx)
 
-    def on_figure_event(self, event):
-        console.log("on_figure_event")
-        # if event.name == 'draw_event':
-        #     current_figure_options = self.get_figure_options()
-        #     if current_figure_options != self._prev_figure_options:
-        #         self._prev_figure_options = current_figure_options
-        #         self.figure.canvas.callbacks.process(FigureOptionChangeEvent())
-        # elif event.name == 'figure_option_change_event':
-        #     # Handle the figure option change event
-        #     print("Figure option has been changed!")
-        #     # Perform any necessary actions here
+    def on_scroll(self, event):
+        if event.button == "up":
+            # print("Scrolled up")
+            self._x_axis_range = self._x_axis_range - 100 if self._x_axis_range > 100 else self._x_axis_range
+        elif event.button == "down":
+            # print("Scrolled down")
+            self._x_axis_range = self._x_axis_range + 100
 
     # UR RTDE #####################################################################################
     def onConnectedChanged(self, connected):
