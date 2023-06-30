@@ -18,6 +18,7 @@ import matplotlib.figure
 
 # QT5
 from PyQt5.QtCore import QObject, pyqtSignal, QThread, QTimer
+from PyQt5.QtWidgets import QFileDialog
 
 # RTDE
 import modules.rtde.rtde as rtde
@@ -81,10 +82,14 @@ class UrRTDE(QObject):
             self._connected = False
             self._rtde_connection = rtde.RTDE(self._ip, self._port)
             #
-            self.MAIN_WIN.comboBox_frequency.setCurrentIndex(5)
+            self.MAIN_WIN.comboBox_frequency.setCurrentIndex(4)
             self._freq = self.freqComboboxTextChanged(self.MAIN_WIN.comboBox_frequency.currentText())
 
-            #
+            # Save #
+            self._save_dir = ""
+            file_directory = os.path.dirname(os.path.abspath(__file__))
+            parent_directory = os.path.abspath(os.path.join(file_directory, ".."))
+            self.changeSaveDirectory(parent_directory)
 
             # -- Local refs -- #
 
@@ -100,6 +105,8 @@ class UrRTDE(QObject):
             self.MAIN_WIN.comboBox_frequency.currentTextChanged.connect(self.freqComboboxTextChanged)
             # RTDE
             self.rtdeFetchedSignal.connect(self.rtde_fetched)
+            # Save
+            self.MAIN_WIN.pushButton_browse.clicked.connect(self.open_directory_dialog)
 
             # -- Initialize -- #
             self.init_rtde()
@@ -107,6 +114,22 @@ class UrRTDE(QObject):
         except Exception as err:
             #
             console.print_exception()
+
+    # Save ########################################################################################
+    def open_directory_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ShowDirsOnly
+        directory = QFileDialog.getExistingDirectory(
+            self.MAIN_WIN, "Select Save Directory", self._save_dir, options=options
+        )
+
+        if directory:
+            # console.log("Selected directory:", directory)
+            self.changeSaveDirectory(directory)
+
+    def changeSaveDirectory(self, dir_path_str):
+        self._save_dir = dir_path_str
+        self.MAIN_WIN.lineEdit_saveFilePath.setText(self._save_dir)
 
     # Frequency ###################################################################################
     def freqComboboxTextChanged(self, text):

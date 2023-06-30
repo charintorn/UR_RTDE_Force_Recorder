@@ -34,22 +34,22 @@ class MatplotlibActualFT(QObject):
             LABEL = f"{module_name}/{func_name}"
             #
 
-            # -- Parent refs -- #
+            # Parent refs #########################################################################
             self.MAIN_WIN = main_win
             self.UR = self.MAIN_WIN._ur
             #
             self._container = self.MAIN_WIN.verticalLayout_actualFT
-            # -- Attributes -- #
+            # Attributes ##########################################################################
 
-            # -- Local refs -- #
+            # Local refs ##########################################################################
 
-            # -- Actions -- #
+            # Actions #############################################################################
 
-            # -- Emitters -- #
+            # Emitters ############################################################################
 
-            # -- Signals -- #
+            # Signals #############################################################################
 
-            # -- Initialize -- #
+            # Initialize ##########################################################################
             #
             self._figure = matplotlib.figure.Figure()
             self._canvas = FigureCanvas(self._figure)
@@ -99,7 +99,12 @@ class MatplotlibActualFT(QObject):
             self._ax_torque.legend()
             self._ax_scalar.legend()
             #
-            self._animation_ft = animation.FuncAnimation(self._figure, self._update_charts, interval=10)
+            self._enable_plotting = False
+
+            # UR ----------------------------------------------------------------------------------
+            self.MAIN_WIN._ur.connectedSignal.connect(self.onConnectedChanged)
+
+            # self._animation_ft = animation.FuncAnimation(self._figure, self._update_charts, interval=10)
 
         except Exception as err:
             #
@@ -274,3 +279,36 @@ class MatplotlibActualFT(QObject):
         if _should_update_y_lims:
             console.log(y_min, y_max)
             self._ax_scalar.set_ylim(self._scalar_min, self._scalar_max)
+
+    # Thread ######################################################################################
+    def thread_update_charts(self):
+        #
+        def task():
+            #
+            while self._enable_plotting:
+                console.log("thread_update_charts")
+                time.sleep(0.1)
+
+        #
+        thread = threading.Thread(target=task, daemon=True)
+        thread.start()
+        #
+        return thread
+
+    # UR RTDE #####################################################################################
+    def onConnectedChanged(self, connected):
+        #
+        try:
+            #
+            func_name = "onConnectedChanged"
+            LABEL = f"{module_name}/{func_name}"
+            #
+            console.log(f"{LABEL} :: onConnectedChanged:", connected)
+            #
+            # self._ur_connected = connected
+            self._enable_plotting = connected
+            #
+
+        except Exception as err:
+            #
+            console.print_exception()

@@ -4,7 +4,7 @@ import threading
 
 # QT5
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QDrag
@@ -49,7 +49,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._ur_connected = False
         self._ur.connectedSignal.connect(self.onConnectedChanged)
         # self._ur.rtdeFetchedSignal.connect(lambda data: console.log(data))
-        #
+        # #
         self._actual_ft_matplot = MatplotlibActualFT(self)
         #
         #
