@@ -11,7 +11,7 @@ import matplotlib
 import matplotlib.animation as animation
 
 
-# matplotlib.use("Qt5Agg")
+matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.figure
@@ -81,17 +81,15 @@ class MatplotlibActualFT(QObject):
             self._figure.tight_layout()
 
             # Create an empty line object
-            self.new_x = 0
             self._x_data_list = []
-            self.y = []
 
-            (self._line_actual_fx,) = self._ax_force.plot([], [], label="Fx")
-            (self._line_actual_fy,) = self._ax_force.plot([], [], label="Fy")
-            (self._line_actual_fz,) = self._ax_force.plot([], [], label="Fz")
+            (self._line_actual_fx,) = self._ax_force.plot([], [], color="red", label="Fx")
+            (self._line_actual_fy,) = self._ax_force.plot([], [], color="green", label="Fy")
+            (self._line_actual_fz,) = self._ax_force.plot([], [], color="blue", label="Fz")
 
-            (self._line_actual_tx,) = self._ax_torque.plot([], [], label="Tx")
-            (self._line_actual_ty,) = self._ax_torque.plot([], [], label="Ty")
-            (self._line_actual_tz,) = self._ax_torque.plot([], [], label="Tz")
+            (self._line_actual_tx,) = self._ax_torque.plot([], [], color="red", label="Tx")
+            (self._line_actual_ty,) = self._ax_torque.plot([], [], color="green", label="Ty")
+            (self._line_actual_tz,) = self._ax_torque.plot([], [], color="blue", label="Tz")
 
             (self._line_actual_scalar,) = self._ax_scalar.plot([], [], label="Scalar")
 
@@ -101,10 +99,11 @@ class MatplotlibActualFT(QObject):
             #
             self._enable_plotting = False
 
+            # Plotting ----------------------------------------------------------------------------
+            self._thread_plot = None
+
             # UR ----------------------------------------------------------------------------------
             self.MAIN_WIN._ur.connectedSignal.connect(self.onConnectedChanged)
-
-            # self._animation_ft = animation.FuncAnimation(self._figure, self._update_charts, interval=10)
 
         except Exception as err:
             #
@@ -153,13 +152,8 @@ class MatplotlibActualFT(QObject):
         #
         return (y_min, y_max)
 
-    def _update_charts(self, frame):
-        self._update_force(frame)
-        self._update_torque(frame)
-        self._update_scalar(frame)
-
     # Function to update the plot
-    def _update_force(self, frame):
+    def _update_force(self):
         #
         _x_data_list = self.UR.pkg_count_list
         _fx_list = self.UR.actual_tcp_Fx
@@ -202,7 +196,7 @@ class MatplotlibActualFT(QObject):
                 self._ax_force.set_ylim(self._force_min, self._force_max)
 
     # Function to update the plot
-    def _update_torque(self, frame):
+    def _update_torque(self):
         #
         x_data_list = self.UR.pkg_count_list
         tx_list = self.UR.actual_tcp_Tx
@@ -244,7 +238,7 @@ class MatplotlibActualFT(QObject):
                 console.log(y_min, y_max)
                 self._ax_torque.set_ylim(self._torque_min, self._torque_max)
 
-    def _update_scalar(self, frame):
+    def _update_scalar(self):
         #
         x_data_list = self.UR.pkg_count_list
         force_list = self.UR.actual_tcp_scalar
@@ -281,13 +275,23 @@ class MatplotlibActualFT(QObject):
             self._ax_scalar.set_ylim(self._scalar_min, self._scalar_max)
 
     # Thread ######################################################################################
-    def thread_update_charts(self):
+    def _thread_update_charts(self):
         #
         def task():
             #
+            console.log("Thread `_thread_update_charts` has began!", style="success")
+            #
             while self._enable_plotting:
-                console.log("thread_update_charts")
-                time.sleep(0.1)
+                #     console.log("thread_update_charts")
+                self._update_torque()
+                self._update_scalar()
+                self._update_force()
+                #
+                self._canvas.draw()
+                #
+                time.sleep(0.01)
+            #
+            console.log("Thread `_thread_update_charts` has stopped!", style="warning")
 
         #
         thread = threading.Thread(target=task, daemon=True)
@@ -304,10 +308,14 @@ class MatplotlibActualFT(QObject):
             LABEL = f"{module_name}/{func_name}"
             #
             console.log(f"{LABEL} :: onConnectedChanged:", connected)
+            # return None
             #
-            # self._ur_connected = connected
-            self._enable_plotting = connected
-            #
+            if connected == True:
+                self._enable_plotting = connected
+                self._thread_plot = self._thread_update_charts()
+            else:
+                self._enable_plotting = False
+                self._thread_plot.join()
 
         except Exception as err:
             #
