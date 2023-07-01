@@ -29,6 +29,7 @@ from modules.rich_setup import *
 
 
 # Modules
+from modules.DialogManager import DialogManager
 from modules.MatplotlibActualFT import MatplotlibActualFT
 from modules.UrRTDE import UrRTDE
 from modules.FileManager import FileManager
@@ -48,6 +49,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         LABEL = f"{module_name}/{func_name}"
         #
         self.setupUi(self)
+
+        # Dialog Manager ##########################################################################
+        self.DIALOG_MANAGER = DialogManager(self)
 
         # UR RTDE #################################################################################
         self._ur = UrRTDE(self)

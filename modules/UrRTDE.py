@@ -187,6 +187,7 @@ class UrRTDE(QObject):
         except Exception as err:
             #
             console.print_exception()
+            self.MAIN_WIN.DIALOG_MANAGER.error.show(err, LABEL)
 
     def disconnect(self):
         try:
