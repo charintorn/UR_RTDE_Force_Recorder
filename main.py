@@ -38,6 +38,9 @@ module_name = "main_win"
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
+    # #############################################################################################
+    # __init__ ####################################################################################
+    # #############################################################################################
     def __init__(self):
         QMainWindow.__init__(self)
         #
@@ -60,26 +63,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self._update_ui()
 
-    # def resizeEvent(self, event):
-    #     super().resizeEvent(event)
-    #     self._actual_ft_matplot._figure.tight_layout()
-    #     self._actual_ft_matplot._canvas.draw()
-
-    def onConnectedChanged(self, status):
-        #
-        console.log("onConnectedChanged:", status)
-        #
-        self._ur_connected = status
-        #
-        self._update_ui()
-
+    # #############################################################################################
+    # UIs #########################################################################################
+    # #############################################################################################
     def _update_ui(self):
         #
         _inv_ui_list = [
             self.lineEdit_ip,
             self.comboBox_frequency,
-            self.lineEdit_saveFilePath,
-            self.pushButton_browse,
             self.pushButton_save,
         ]
         #
@@ -93,7 +84,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_start.setText(_start_btn_text)
         self.pushButton_start.setStyleSheet(f"background-color:{_start_btn_colour}")
 
+    # #############################################################################################
+    # Connection ##################################################################################
+    # #############################################################################################
+    def onConnectedChanged(self, status):
+        #
+        console.log("onConnectedChanged:", status)
+        #
+        self._ur_connected = status
+        #
+        self._update_ui()
 
+
+# #################################################################################################
+# __main__ ########################################################################################
+# #################################################################################################
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     win = MainWindow()
