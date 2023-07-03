@@ -2,6 +2,10 @@
 import sys
 import threading
 
+
+# Add "./modules" to the Python module search path
+sys.path.append("./modules")
+
 # QT5
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication
