@@ -50,6 +50,7 @@ class UrRTDE(QObject):
             self.MAIN_WIN = main_win
 
             # -- Attributes -- #
+
             # data #
             self.pkg_count = 0
             self.pkg_count_list = []
@@ -67,14 +68,24 @@ class UrRTDE(QObject):
             self._CONFIG_FILE = "rtde_config.xml"
             self._conf = None
             #
-            self._state_names = None
-            self._state_types = None
-            #
-            self._setp_names = None
-            self._setp_types = None
-            #
-            self._watchdog_names = None
-            self._watchdog_types = None
+            self._state_names = []
+            self._state_types = []
+
+            self._ur_op_config_list = [
+                ("timestamp", "DOUBLE"),
+                ("runtime_state", "UINT32"),
+                ("actual_q", "VECTOR6D"),
+                ("actual_TCP_force", "VECTOR6D"),
+                ("actual_TCP_pose", "VECTOR6D"),
+                ("actual_TCP_speed", "VECTOR6D"),
+                ("tcp_force_scalar", "DOUBLE"),
+            ]
+            # # ur inputs
+            # self._setp_names = None
+            # self._setp_types = None
+            # # watch dog
+            # self._watchdog_names = None
+            # self._watchdog_types = None
             #
             self._read_thread = None
             self._read_thread_running = False
@@ -219,28 +230,34 @@ class UrRTDE(QObject):
     # #############################################################################################
     def init_rtde(self):
         # Get the path of the current directory
-        current_dir = os.path.dirname(os.path.realpath(__file__))
+        # current_dir = os.path.dirname(os.path.realpath(__file__))
 
         # Construct the full path to the RTDE configuration file
-        config_path = os.path.join(current_dir, self._CONFIG_FILE)
+        # config_path = os.path.join(current_dir, self._CONFIG_FILE)
 
         # Configure the RTDE communication
-        self._conf = rtde_config.ConfigFile(config_path)
+        # self._conf = rtde_config.ConfigFile(config_path)
 
-        self._state_names, self._state_types = self._conf.get_recipe(
-            "state"
-        )  # Define recipe for access to robot output ex. joints,tcp etc.
-        self._setp_names, self._setp_types = self._conf.get_recipe("setp")  # Define recipe for access to robot input
-        self._watchdog_names, self._watchdog_types = self._conf.get_recipe("watchdog")
+        # self._state_names, self._state_types = self._conf.get_recipe(
+        #     "state"
+        # )  # Define recipe for access to robot output ex. joints,tcp etc.
+        # self._setp_names, self._setp_types = self._conf.get_recipe("setp")  # Define recipe for access to robot input
+        # self._watchdog_names, self._watchdog_types = self._conf.get_recipe("watchdog")
+
+        for op_config in self._ur_op_config_list:
+            # console.log(op_config[0], op_config[1])
+            self._state_names.append(op_config[0])
+            self._state_types.append(op_config[1])
+        # pass
 
     def config_after_connected(self):
         # ------------------- setup recipes ----------------------------
         FREQUENCY = 50  # send data in 500 Hz instead of default 125Hz
         self._rtde_connection.send_output_setup(self._state_names, self._state_types, FREQUENCY)
-        setp = self._rtde_connection.send_input_setup(
-            self._setp_names, self._setp_types
-        )  # Configure an input package that the external application will send to the robot controller
-        watchdog = self._rtde_connection.send_input_setup(self._watchdog_names, self._watchdog_types)
+        # setp = self._rtde_connection.send_input_setup(
+        #     self._setp_names, self._setp_types
+        # )  # Configure an input package that the external application will send to the robot controller
+        # watchdog = self._rtde_connection.send_input_setup(self._watchdog_names, self._watchdog_types)
 
     def read(self):
         #

@@ -8,7 +8,7 @@ sys.path.append("./modules")
 
 # QT5
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow, QApplication
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QDrag
@@ -54,6 +54,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #
         self.setupUi(self)
 
+        # Infomation ##############################################################################
+        self.APP_NAME = "UR Force Recorder"
+        self.VERSION = "0.1.0"
+
+        # Application #############################################################################
+        self.actionExit.triggered.connect(self._close_app)
+
         # Dialog Manager ##########################################################################
         self.DIALOG_MANAGER = DialogManager(self)
 
@@ -66,14 +73,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Matplotlib ##############################################################################
         self._actual_ft_matplot = MatplotlibActualFT(self)
 
-        # Matplotlib ##############################################################################
+        # File manager ############################################################################
         self.FILE_MANAGER = FileManager(self)
 
+        # UIs #####################################################################################
+        self._init_ui()
         self._update_ui()
+
+    # #############################################################################################
+    # Application #################################################################################
+    # #############################################################################################
+    def _close_app(self):
+        QApplication.quit()
 
     # #############################################################################################
     # UIs #########################################################################################
     # #############################################################################################
+    def _init_ui(self):
+        self.setWindowTitle(f"{self.APP_NAME} - Version {self.VERSION}")
+
     def _update_ui(self):
         #
         _inv_ui_list = [

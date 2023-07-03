@@ -132,7 +132,7 @@ class MatplotlibActualFT(QObject):
             self._axes[1].set_ylabel("Torque (Nm)", labelpad=20)
             self._axes[2].set_ylabel("Force (scalar)", labelpad=20)
 
-            self._axes[2].set_xlabel("timestamp", labelpad=0)
+            self._axes[2].set_xlabel("Record", labelpad=10)
 
             for _axs in self._axes:
                 _axs.grid(True)
@@ -296,7 +296,7 @@ class MatplotlibActualFT(QObject):
         #
         def task():
             #
-            console.log("Thread `_thread_update_charts` has began!", style="success")
+            console.log("Thread `_thread_update_charts` has begun!", style="success")
             #
             while self._enable_plotting:
                 #     console.log("thread_update_charts")

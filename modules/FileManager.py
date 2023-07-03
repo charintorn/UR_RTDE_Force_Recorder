@@ -51,6 +51,7 @@ class FileManager(QObject):
 
             # Signals #############################################################################
             self.MAIN_WIN.pushButton_save.clicked.connect(self._on_save_handler)
+            self.MAIN_WIN.actionSave.triggered.connect(self._on_save_handler)
 
             # Initialize ##########################################################################
 
