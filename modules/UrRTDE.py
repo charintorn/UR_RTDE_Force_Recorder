@@ -21,8 +21,12 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread, QTimer
 from PyQt5.QtWidgets import QFileDialog
 
 # RTDE
-import modules.rtde.rtde as rtde
-import modules.rtde.rtde_config as rtde_config
+# sys.path.append("./modules")
+# sys.path.append("./modules/rtde")
+
+import modules.rtde as rtde
+
+# import modules.rtde.rtde_config as rtde_config
 
 # Others
 from modules.rich_setup import *

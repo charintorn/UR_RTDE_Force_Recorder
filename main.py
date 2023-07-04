@@ -1,10 +1,17 @@
 # Modules
 import sys
+import os
 import threading
 
 
 # Add "./modules" to the Python module search path
-sys.path.append("./modules")
+# sys.path.append("./modules")
+# sys.path.append("./modules/rtde")
+
+sys.path.append(os.path.join(os.getcwd(), "modules"))
+
+MODULES_PATH = os.path.join(os.getcwd(), "modules")
+print("MODULES_PATH:", MODULES_PATH)
 
 # QT5
 from PyQt5 import QtCore, QtWidgets

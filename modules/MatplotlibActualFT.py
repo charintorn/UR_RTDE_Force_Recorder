@@ -20,6 +20,7 @@ import matplotlib.figure
 from PyQt5.QtCore import QObject, pyqtSignal, QThread, QTimer
 
 # Others
+sys.path.append("./modules")
 from modules.rich_setup import *
 
 module_name = "MatplotlibActualFT"
