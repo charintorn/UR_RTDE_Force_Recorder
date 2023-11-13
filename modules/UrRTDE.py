@@ -21,10 +21,8 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread, QTimer
 from PyQt5.QtWidgets import QFileDialog
 
 # RTDE
-# sys.path.append("./modules")
-# sys.path.append("./modules/rtde")
-
-import modules.rtde as rtde
+# from "./rtde" import rtde
+import rtde.rtde as rtde
 
 # import modules.rtde.rtde_config as rtde_config
 
@@ -101,7 +99,9 @@ class UrRTDE(QObject):
             self._rtde_connection = rtde.RTDE(self._ip, self._port)
             #
             self.MAIN_WIN.comboBox_frequency.setCurrentIndex(4)
-            self._freq = self.freqComboboxTextChanged(self.MAIN_WIN.comboBox_frequency.currentText())
+            self._freq = self.freqComboboxTextChanged(
+                self.MAIN_WIN.comboBox_frequency.currentText()
+            )
 
             # -- Local refs -- #
 
@@ -116,7 +116,9 @@ class UrRTDE(QObject):
             self.MAIN_WIN.pushButton_start.clicked.connect(self.onStartBtnClicked)
 
             # frequency
-            self.MAIN_WIN.comboBox_frequency.currentTextChanged.connect(self.freqComboboxTextChanged)
+            self.MAIN_WIN.comboBox_frequency.currentTextChanged.connect(
+                self.freqComboboxTextChanged
+            )
 
             # RTDE
             self.rtdeFetchedSignal.connect(self.rtde_fetched)
@@ -257,7 +259,9 @@ class UrRTDE(QObject):
     def config_after_connected(self):
         # ------------------- setup recipes ----------------------------
         FREQUENCY = 50  # send data in 500 Hz instead of default 125Hz
-        self._rtde_connection.send_output_setup(self._state_names, self._state_types, FREQUENCY)
+        self._rtde_connection.send_output_setup(
+            self._state_names, self._state_types, FREQUENCY
+        )
         # setp = self._rtde_connection.send_input_setup(
         #     self._setp_names, self._setp_types
         # )  # Configure an input package that the external application will send to the robot controller

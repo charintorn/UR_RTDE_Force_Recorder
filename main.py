@@ -33,6 +33,7 @@ import matplotlib.figure
 
 
 # UI
+from gui.resources import resources_rc
 from gui.main_ui import Ui_MainWindow
 
 # Others
